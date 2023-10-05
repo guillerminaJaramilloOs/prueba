@@ -25,21 +25,6 @@ steps:
     performMultiLevelLookup: true
     includePreviewVersions: true # Required for preview versions
 #Construyeelproyecto
-
-- task: DotNetCoreCLI@2
-  displayName: Build
-  inputs:
-    command: build
-    projects: '**/*.csproj'
-    arguments: '--configuration $(buildConfiguration)' # Update this to match your need
-    - task: CopyFiles@2
-  inputs:
-    SourceFolder: 'source' # Ruta de origen
-    Contents: '**/Program.cs' # Patrón para seleccionar el archivo
-    TargetFolder: '$(Build.SourcesDirectory)' # Ruta de destino
-
-
-#Donet personalizado
 - task: DotNetCoreCLI@2
   displayName: 'Install dotnetsay'
   inputs:
@@ -47,6 +32,57 @@ steps:
     custom: tool
     arguments: 'install -g dotnetsay'
     
-    
+ #Ejecucióndepruebas
+# do this after other tasks such as building
+- task: DotNetCoreCLI@2
+  inputs:
+    command: test
+    projects: '**/*Tests/*.csproj'
+    arguments: '--configuration $(buildConfiguration)'
+#Recopilar cobertura de código
+# do this after other tasks such as building
+- task: DotNetCoreCLI@2
+  inputs:
+    command: test
+    projects: '**/*Tests/*.csproj'
+    arguments: '--configuration $(buildConfiguration) --collect "Code coverage"'
+
+#PruebasDeCobertura
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet test'
+  inputs:
+    command: 'test'
+    arguments: '--configuration $(buildConfiguration) --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura'
+    publishTestResults: true
+    projects: '**/test-library/*.csproj' # update with your test project directory
+#Metricas 
+# do this after other tasks such as building
+- task: DotNetCoreCLI@2
+  inputs:
+    command: test
+    projects: '**/*Tests/*.csproj'
+    arguments: '--configuration $(buildConfiguration)'
+#Publicar atefactos 
+- task: PublishPipelineArtifact@1
+  inputs:
+    targetPath: '$(Build.ArtifactStagingDirectory)' 
+    artifactName: 'myWebsiteName'
+
+#Publicar web
+
+# do this after you've built your app, near the end of your pipeline in most cases
+# for example, you do this before you deploy to an Azure web app on Windows
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet publish'
+  inputs:
+    command: 'publish'
+    publishWebProjects: false # Configura esto a false
+    arguments: '--configuration $(BuildConfiguration) --output $(Build.ArtifactStagingDirectory)'
+    zipAfterPublish: true
+
+
+
+
+
  
 
