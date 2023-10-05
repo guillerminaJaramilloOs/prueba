@@ -25,6 +25,15 @@ steps:
     performMultiLevelLookup: true
     includePreviewVersions: true # Required for preview versions
 #Construyeelproyecto
+
+- task: DotNetCoreCLI@2
+  displayName: Build
+  inputs:
+    command: build
+    projects: '**/*.csproj'
+    arguments: '--configuration $(buildConfiguration)' # Update this to match your need
+
+#Donet personalizado
 - task: DotNetCoreCLI@2
   displayName: 'Install dotnetsay'
   inputs:
@@ -39,6 +48,20 @@ steps:
     command: test
     projects: '**/*Tests/*.csproj'
     arguments: '--configuration $(buildConfiguration)'
+	
+	
+#PublicarResultadosDePrueba
+# ...
+# do this after your tests have run
+- script: dotnet test <test-project> --logger trx
+- task: PublishTestResults@2
+  condition: succeededOrFailed()
+  inputs:
+    testRunner: VSTest
+    testResultsFiles: '**/*.trx'	
+	
+	
+	
 #Recopilar cobertura de código
 # do this after other tasks such as building
 - task: DotNetCoreCLI@2
@@ -62,6 +85,50 @@ steps:
     command: test
     projects: '**/*Tests/*.csproj'
     arguments: '--configuration $(buildConfiguration)'
+
+#RecopilarCobertyuraDeCodigo
+# do this after other tasks such as building
+- task: DotNetCoreCLI@2
+  inputs:
+    command: test
+    projects: '**/*Tests/*.csproj'
+    arguments: '--configuration $(buildConfiguration) --collect "Code coverage"'	
+	
+#PublicarResultadosdEpRUEBA
+# do this after your tests have run
+- script: dotnet test <test-project> --logger trx --collect "Code coverage"
+- task: PublishTestResults@2
+  inputs:
+    testRunner: VSTest
+    testResultsFiles: '**/*.trx'
+	
+#RecopilaRMetricasdeCoverlet
+- task: UseDotNet@2
+  inputs:
+    version: '6.x'
+    includePreviewVersions: true # Required for preview versions
+  
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet build'
+  inputs:
+    command: 'build'
+    configuration: $(buildConfiguration)
+  
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet test'
+  inputs:
+    command: 'test'
+    arguments: '--configuration $(buildConfiguration) --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=cobertura'
+    publishTestResults: true
+    projects: 'MyTestLibrary' # update with your test project directory
+  
+- task: PublishCodeCoverageResults@1
+  displayName: 'Publish code coverage report'
+  inputs:
+    codeCoverageTool: 'Cobertura'
+    summaryFileLocation: '$(Agent.TempDirectory)/**/coverage.cobertura.xml'	
+	
+	
 #Publicar atefactos 
 - task: PublishPipelineArtifact@1
   inputs:
@@ -69,7 +136,6 @@ steps:
     artifactName: 'myWebsiteName'
 
 #Publicar web
-
 # do this after you've built your app, near the end of your pipeline in most cases
 # for example, you do this before you deploy to an Azure web app on Windows
 - task: DotNetCoreCLI@2
