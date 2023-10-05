@@ -39,10 +39,20 @@ steps:
     arguments: '--configuration $(buildConfiguration)' # Update this to match your need
 
 
- #  Parte Cuatro, personalización
+ #Parte Cuatro, personalización
 - task: DotNetCoreCLI@2
   displayName: 'Install dotnetsay'
   inputs:
     command: custom
     custom: tool
     arguments: 'install -g dotnetsay'
+#Parte cinco, ejecución de pruebas 
+# ...
+# do this after other tasks such as building
+- task: DotNetCoreCLI@2
+  inputs:
+    command: test
+    projects: '**/*Tests/*.csproj'
+    arguments: '--configuration $(buildConfiguration)'
+
+    
