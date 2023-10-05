@@ -32,6 +32,12 @@ steps:
     command: build
     projects: '**/*.csproj'
     arguments: '--configuration $(buildConfiguration)' # Update this to match your need
+    - task: CopyFiles@2
+  inputs:
+    SourceFolder: 'source' # Ruta de origen
+    Contents: '**/Program.cs' # Patrón para seleccionar el archivo
+    TargetFolder: '$(Build.SourcesDirectory)' # Ruta de destino
+
 
 #Donet personalizado
 - task: DotNetCoreCLI@2
@@ -40,6 +46,7 @@ steps:
     command: custom
     custom: tool
     arguments: 'install -g dotnetsay'
+    
     
  
 
