@@ -37,12 +37,13 @@ steps:
     arguments: 'install -g dotnetsay'
     
  #Ejecucióndepruebas
-# do this after other tasks such as building
-- task: DotNetCoreCLI@2
+# do this after your tests have run
+- script: dotnet test <test-project> --logger trx
+- task: PublishTestResults@2
+  condition: succeededOrFailed()
   inputs:
-    command: test
-    projects: '**/*Tests/*.csproj'
-    arguments: '--configuration $(buildConfiguration)'
+    testRunner: VSTest
+    testResultsFiles: '**/*.trx'
 
 
 #Recopilar cobertura de código
