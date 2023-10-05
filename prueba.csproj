@@ -5,14 +5,12 @@
     <TargetFramework>net6.0</TargetFramework>
   </PropertyGroup>
 
-</Project>
-<PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-  <DefineConstants>DEBUG;TRACE</DefineConstants>
-</PropertyGroup>
-
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+  </PropertyGroup>
 
   <ItemGroup>
     <Compile Include="Program.cs" />
   </ItemGroup>
 
-
+</Project>
